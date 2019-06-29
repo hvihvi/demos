@@ -25,6 +25,13 @@ class ItContainer {
     );
   }
 
+  or(them: ItContainer) {
+    return new ItContainer(
+      this.it || them.it,
+      `(${this.itsName} or ${them.itsName})`
+    );
+  }
+
   eval() {
     return this.it;
   }

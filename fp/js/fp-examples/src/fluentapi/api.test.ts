@@ -40,4 +40,20 @@ describe("It", () => {
       .print();
     expect(result).toEqual("(myTrue and myFalse) is false");
   });
+  it("should eval true or false to false", () => {
+    const myTrue = true;
+    const myFalse = false;
+    const result = It`myTrue`(myTrue)
+      .or(It`myFalse`(myFalse))
+      .eval();
+    expect(result).toEqual(true);
+  });
+  it("should print (myTrue or myFalse) is false", () => {
+    const myTrue = true;
+    const myFalse = false;
+    const result = It`myTrue`(myTrue)
+      .or(It`myFalse`(myFalse))
+      .print();
+    expect(result).toEqual("(myTrue or myFalse) is true");
+  });
 });
