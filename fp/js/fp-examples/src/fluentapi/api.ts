@@ -18,6 +18,13 @@ class ItContainer {
     return new ItContainer(this.it === false, `(${this.itsName} is false)`);
   }
 
+  and(them: ItContainer) {
+    return new ItContainer(
+      this.it && them.it,
+      `(${this.itsName} and ${them.itsName})`
+    );
+  }
+
   eval() {
     return this.it;
   }

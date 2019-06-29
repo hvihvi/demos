@@ -24,4 +24,20 @@ describe("It", () => {
       .print();
     expect(result).toEqual("(((myBool is true) is true) is false) is false");
   });
+  it("should eval true and false to false", () => {
+    const myTrue = true;
+    const myFalse = false;
+    const result = It`myTrue`(myTrue)
+      .and(It`myFalse`(myFalse))
+      .eval();
+    expect(result).toEqual(false);
+  });
+  it("should print (myTrue and myFalse) is true", () => {
+    const myTrue = true;
+    const myFalse = false;
+    const result = It`myTrue`(myTrue)
+      .and(It`myFalse`(myFalse))
+      .print();
+    expect(result).toEqual("(myTrue and myFalse) is false");
+  });
 });
