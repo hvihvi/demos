@@ -32,6 +32,14 @@ class ItContainer {
     );
   }
 
+  map(fn: (it: boolean) => boolean) {
+    const fnName = fn.name ? fn.name : "anonymous function";
+    return new ItContainer(
+      fn(this.it),
+      `(${this.itsName} mapped by ${fnName})`
+    );
+  }
+
   eval() {
     return this.it;
   }

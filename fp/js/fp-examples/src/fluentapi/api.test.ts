@@ -56,4 +56,19 @@ describe("It", () => {
       .print();
     expect(result).toEqual("(myTrue or myFalse) is true");
   });
+  it("should print mapped by", () => {
+    const myTrue = true;
+    const toFalse = () => false;
+    const result = It`myTrue`(myTrue)
+      .map(toFalse)
+      .print();
+    expect(result).toEqual(`(myTrue mapped by toFalse) is false`);
+  });
+  it("should print anonymous function", () => {
+    const myTrue = true;
+    const result = It`myTrue`(myTrue)
+      .map(() => false)
+      .print();
+    expect(result).toEqual(`(myTrue mapped by anonymous function) is false`);
+  });
 });
