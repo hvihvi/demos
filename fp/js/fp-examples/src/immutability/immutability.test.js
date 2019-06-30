@@ -1,4 +1,4 @@
-import { addFoo, addFoo1 } from "./immutability";
+import { addFoo, addFoo1, addAge1 } from "./immutability";
 
 // BAD
 describe("addFoo1", () => {
@@ -27,5 +27,21 @@ describe("addFoo", () => {
     const result = addFoo(array);
     // then
     expect(result).toEqual(["a", "b", "foo"]);
+  });
+});
+
+// BAD
+describe("addAge1", () => {
+  // again, the assertion on the modified input makes the mutation obvious
+  it("mutates", () => {
+    // given
+    const person1 = {
+      name: "hugo",
+      age: 32
+    };
+    // when
+    addAge1(person1);
+    // then
+    expect(person1.age).toEqual(33);
   });
 });

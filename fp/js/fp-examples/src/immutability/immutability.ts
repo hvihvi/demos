@@ -19,8 +19,9 @@ type Person = {
 
 // BAD
 // object mutation example 1
-const addAge1 = (person: Person) => {
+export const addAge1 = (person: Person) => {
   person.age = person.age + 1;
+  return person;
 };
 
 // GOOD
