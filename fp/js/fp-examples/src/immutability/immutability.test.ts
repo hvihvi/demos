@@ -1,4 +1,4 @@
-import { addFoo, addFoo1, addAge1 } from "./immutability";
+import { addFoo, addFoo1, addAge1, Person, Sex, Gender } from "./immutability";
 
 // BAD
 describe("addFoo1", () => {
@@ -35,9 +35,11 @@ describe("addAge1", () => {
   // again, the assertion on the modified input makes the mutation obvious
   it("mutates", () => {
     // given
-    const person1 = {
+    const person1: Person = {
       name: "hugo",
-      age: 32
+      age: 32,
+      sex: Sex.M,
+      gender: Gender.MR
     };
     // when
     addAge1(person1);

@@ -10,7 +10,7 @@ export const addFoo = (names: string[]) => {
   return [...names, "foo"];
 };
 
-type Person = {
+export type Person = {
   name: string;
   age: number;
   sex: Sex;
@@ -30,13 +30,13 @@ const addAge = (person: Person) => {
   return { ...person, age: person.age + 1 };
 };
 
-enum Gender {
+export enum Gender {
   MR = "Monsieur",
   MME = "Madame",
   MLLE = "Mademoiselle"
 }
 
-enum Sex {
+export enum Sex {
   M,
   F
 }
