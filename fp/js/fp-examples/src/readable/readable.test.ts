@@ -1,7 +1,7 @@
 import { r } from "./readable";
 
 it("should map isTrue", () => {
-  const not = b => !b;
+  const not = (b: boolean) => !b;
   const myConst = true;
   const result = r(myConst)`TRUue`
     .map(not)
