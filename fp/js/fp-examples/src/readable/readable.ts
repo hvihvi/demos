@@ -23,7 +23,7 @@ class Readable {
   }
 
   isEqualTo(them: Readable) {
-    return this.it === them
+    return this.it === them.it
       ? new Readable(true, `${this.itsName} is equal to ${them.itsName}`)
       : new Readable(false, `${this.itsName} is not equal to ${them.itsName}`);
   }
@@ -53,6 +53,11 @@ class Readable {
       result.it,
       `${this.itsName} mapped by ${result.itsName}`
     );
+  }
+
+  ap(them: Readable) {
+    const result = them.it(this.it);
+    return new Readable(result, `${this.itsName} mapped by ${them.itsName}`);
   }
 
   eval() {

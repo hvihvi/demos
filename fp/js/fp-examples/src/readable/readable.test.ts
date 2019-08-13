@@ -11,11 +11,22 @@ it("should map isTrue", () => {
 });
 
 it("should map", () => {
-  const not = b => !b;
+  const not = (b: boolean) => !b;
   const myConst = true;
   const result = r(myConst)``
     .map(not)
     .isEqualTo(r("smth else")`something else`)
     .print();
   expect(result).toBe("true mapped by not is not equal to something else");
+});
+
+it("should ap", () => {
+  const not = (b: boolean) => !b;
+  const negation = r(not)`negation`;
+  const myConst = true;
+  const result = r(myConst)``
+    .ap(negation)
+    .isEqualTo(r(false)`false`)
+    .print();
+  expect(result).toBe("true mapped by negation is equal to false");
 });
