@@ -1,68 +1,188 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Bonnes pratiques React & JS
 
-## Available Scripts
+JS contient beaucoup de features, du legacy, d'autres mal foutues, et certaines très pratiques. Il faut piocher le meilleur et éviter le pire.
 
-In the project directory, you can run:
+# FP
 
-### `npm start`
+- trendy dans l'ecosysteme JS
+- cleaner code, facilite la compréhension, moins de boilerplate, mental model simple
+- un vocabulaire qui fait peur, mais des conceptes simple, pas besoin d'être un autiste (du moins pour la partie qui nous intéresse)
+- y a plus à désapprendre qu'à apprendre
+- pour ceux qui aiment pas y a Angular :troll: : https://2019.stateofjs.com/front-end-frameworks/
+- Parfois mal interprété: ne pas confondre functionnal programming et fluent API / builders ❗️ :
+```js
+map(a).to(b).with(toto).and(whatever) // Not FP: fluent API / builders
+a.isEqualTo(b.and(c.not())) // Not FP: fluent API / builders
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+// function and composition as primary abstraction tool
+const b = M(a).map(f).map(g) // FP functor/monad
+const f = a => 2 * a // FP functions
+const b = g(f(a)) // FP functions
+const b = g(f) // FP functions
+const fgh = compose(f,g,h) // FP functions
+const f = a => b => a + b // FP functions
+```
+- En gros, éviter les design patterns farfelu, utiliser des fonctions, et encore des fonctions https://youtu.be/srQt1NAHYC0?t=226
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+## Do not use inheritance ("extends"), use composition
+  - use **composition** (valable pour java aussi, mais c'est plus simple à faire en js...)
+  - composition de fonctions:
+  ```js
+  // composition de fonctions
+  const b = mapAtoB(a);
+  const c = mapBtoC(b);
 
-### `npm test`
+  // version sans variables intermédiaires
+  const b = mapBtoC(mapAtoB(a));
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+  // version sans variables intermédiaires ++
+  const c = compose(mapAtoB, mapBtoC)(b)
 
-### `npm run build`
+  // composition dans map (monad/functors)
+  M(a).map(mapAtoB).map(mapBtoC)
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+  // high order function
+  const c = myFunction(anotherFunction);
+  // currying
+  const f = a => b => a + b
+  ```
+  - composition de components en JSX:
+  ```js
+  const Comp = () =>
+  <Parent>
+    <Fils1/>
+    <Fils2>
+      <PetitFils/>
+    </Fils2>
+  </Parent>
+  ```
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+## avoid classes
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+* avoid `class`, `new`, `this`...
+  - https://codesandbox.io/s/react-mutation-antipattern-demo-jv5sw : on perd l'encapsulation d'étât de React
+  - Est-ce que je peux remplacer par des fonctions? pure? Est-ce que je peux utiliser les outils mis à disposition par React (ex: `<Context>`, hook, redux...)
+  - risque d'avoir des modèles mentaux basés sur Java, alors que `this` et l'héritage sont différents (prototypal inheritance) https://blog.isquaredsoftware.com/presentations/2019-05-js-for-java-devs/#/62
+  - pas besoin de créer des `ApiClientService` à instancier en lui passant une baseUrl etc, une simple fonction avec un param suffit (ex ici: `fetch`)
+  - pas besoin de faire des classes avec methodes static, une fonction suffit
 
-### `npm run eject`
+## let vs const vs var
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+  - never use var
+  - let vs const : https://codesandbox.io/s/let-and-const-6hkk8
+  - les 2 permettent des mutations, const un poil moins
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## avoid hasty abstractions
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+  - inversion of control, DRY, separation of concerns, design-patterns... à modérer 🙏 source de code difficile à penser et manipuler ❗️
+  - Exemple DRY hâtif:
+    * "hey, si je mutualisais ce truc, ça sera cool, j'aurais plus besoin de me répéter"...
+    * le temps passe...
+    * "hey, je dois utiliser ce truc mais c'est un peu différent, je rajoute un petit if"
+    * le temps passe...
+    * le truc mutualisé devient un gros fourre tout bordélique
+    * Sandi Metz tl;dr: la duplication coute moins cher à la boite que la mauvaise abstraction, surtout appliquée en largeur comme on aime faire chez LF
+  ```js
+  <Button> // day 1
+  <Button color={blue} weight={PRIMARY}> // day 2
+  <Button color={blue} weight={PRIMARY} tag={DIV} logoIfPresent={logo} hasBorder={false} upperCase={true} isAuto={false} cEstLaFete={true}> // ...
+  // alternative dupliquée
+  <PrimaryButton>
+  <SecondaryButton>
+  <AutoCta>
+  <HardToNameButton>
+  ```
+  - Exemple d'inversion of control hâtive qui complique la tâche :
+```js
+// Pattern IoC (render props)
+<ComposantComplexe
+  className={"aze"}
+  renderTrucInterne={ctx => <TropBienJeChoisisMonRendu // mais bon c'est chiant faut lui passer ctx si on veut accéder à l'état interne, inception
+    ctx={ctx}
+    renderAutreTrucInterne={<EtAussiLeRenduDuRendu/>}
+  />}
+/>
 
-## Learn More
+// VS composition
+const ComposantProbablementMoinsComplexe = () =>
+<Wrapper>
+  <TrucInterne>
+    <TrucDansLeTruc/>
+  </TrucInterne>
+  <AutreTrucInterne/>
+</Wrapper>
+```
+  - separation of concerns: ex: split js/html/css. JSX, css-in-js, ça trigger les anciens, mais ça facilite la vie. Présenté en 2014 par @vjeux (prettier, react native...), en 2019 rewrite de facebook avec ces techno.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## avoid mutations
 
-### Code Splitting
+  - examples of mutations and solutions: https://codesandbox.io/s/github/hvihvi/ts-enforce-immutability-examples/tree/master/
+  - Java bonus: avoid setters
+  - discussion: event_service/history_service
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+  - bad array prototype functions:
+  array.push() // ❌ add to back
+  array.unshift() // ❌ add to front
+  array.pop() // ❌ remove from back
+  array.shift() // ❌ remove from front
+  array.splice() // ❌ can insert or remove in the middle
+  array.sort() // ❌ sorts the array in-place!!!
+  array.reverse() // ❌ reverse the array in-place
 
-### Analyzing the Bundle Size
+## Functors, Monads & syntactic sugar
+  - Functors : Wrapper/boite qui peut contenir n'importe quel type, qui masque la complexité et qui permet de `map` d'un type A vers un type B...
+  ```js
+  // sans functor
+  const b = mapAtoB(a);
+  const c = mapBtoC(b);
+  
+  // avec functor
+  Boite(a)
+    .map(mapAtoB)
+    .map(mapBtoC)
+  
+  // => permet d'abstraire ce qu'il se passe dans la Boite, et d'appliquer des fonctions directement sur `a`
+  ```
+  - Monads : un functor qui peut `flatMap`, c'est équivalent à map mais une `Boite(Boite(a))` devient une `Boite(a)` :
+  ```js
+  Boite(a)
+    .flatMap(mapAtoBoiteDeB) // on applique à Boite(A) une fonction A -> Boite(B), on récupère une Boite(B) au lieu de Boite(Boite(B)) avec un map classique
+    .map(mapBtoC)
+  ```
+  - async/await & promises
+  - optionals
+  - arrays
+  
+  
+ ## CSS
+  - design bancale du language basé sur l'héritage
+  - éviter de "cascader" (hériter)
+  - pattern "css-in-js", 1 css par composant, on utilise le composant (avec son style) comme abstraction et on compose avec en JSX, plutôt que partager des classnames
+  - Note BEM: Garder l'esprit de découpe est le même, mais découper en Components au lieu de className
+  - discussion: éviter les collisions?
+  - si vous avez à écrire du css hors du design-system, posez vous la question si c'est normal ou pas
+```js
+import "./Component.scss";
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+export const Component: FC<ComponentProps> = ({children}) => <div className="Component">{children}</div>;
+```
 
-### Making a Progressive Web App
+## flexbox grid vs bootstrap
+  - kill bootstrap?
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+## === vs ==
+  - avoid `==` : `true === 1 // false`, `true == 1 // true` https://blog.isquaredsoftware.com/presentations/2019-05-js-for-java-devs/#/40
 
-### Advanced Configuration
+## external libs
+  - no jquery
+  - don't use libs imported from jsp
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+## state management
 
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+  - state management tools:
+    * plain React: lift state jusqu'au plus haut composant commun (TODO: faire un dessin)
+    * Redux: state global, mais bien managé
+    * StateX: states possibles et transformations hardcodés
+  -  garder states minimales: par exemple, au lieu d'avoir un état qui dit si on est LOADING/DISPLAY_PPS/ERROR et un état qui contient les tarifications, il suffit de fetcher les tarifications, et display loading si tarifications est undefined, et error si offre.length===0 par exemple. 1 état au lieu de 2.
