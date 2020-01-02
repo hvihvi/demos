@@ -23,6 +23,11 @@ const fgh = compose(f,g,h) // FP functions
 const f = a => b => a + b // FP functions
 ```
 - En gros, éviter les design patterns farfelu, utiliser des fonctions, et encore des fonctions https://youtu.be/srQt1NAHYC0?t=226
+- bonus:
+```js
+// compose(f,g,h)(val) === f(g(h(val))) 
+const compose = (...fns) => x0 => fns.reduceRight((x, f) => f(x), x0)
+```
 
 ## Do not use inheritance ("extends"), use composition
   - use **composition** (valable pour java aussi, mais c'est plus simple à faire en js...)
@@ -123,8 +128,9 @@ const ComposantProbablementMoinsComplexe = () =>
 ## avoid mutations
 
   - examples of mutations and solutions: https://codesandbox.io/s/github/hvihvi/ts-enforce-immutability-examples/tree/master/
+  - train detection and removal
   - Java bonus: avoid setters
-  - discussion: event_service/history_service
+  - discussion: event_service/history_service?
 
   - bad array prototype functions:
   array.push() // ❌ add to back
@@ -134,6 +140,21 @@ const ComposantProbablementMoinsComplexe = () =>
   array.splice() // ❌ can insert or remove in the middle
   array.sort() // ❌ sorts the array in-place!!!
   array.reverse() // ❌ reverse the array in-place
+
+## Pure functions
+
+
+## State management
+
+  - avoid shared mutable states  (éviter classes, variables globales, mutables...)
+  - Minimiser, isoler, encapsuler
+  - functions/operations/routines that act on shared state are time and order dependent. FP solution : handle state in a single object "outside" the application, updated with an immutable approach (so cloned and updated each time). => state managers like redux
+  -  Minimal states: par exemple, au lieu d'avoir un état qui dit si on est LOADING/DISPLAY_PPS/ERROR et un état qui contient les tarifications, il suffit de fetcher les tarifications, et display loading si tarifications est undefined, et error si offre.length===0 par exemple. 1 état au lieu de 2.
+  - Primary state management tools in React:
+    * plain React: lift state jusqu'au plus haut composant commun (TODO: faire un dessin)
+    * plain React with Context: même esprit qu'au dessus, permet d'eviter les props drilling. Un peu moins opti que redux sur des states qui changent beaucoup, mais ça fait le taf. Nickel pour partager des constantes ou presque.
+    * Redux: state global, mais bien managé
+    * StateX: states possibles et transformations hardcodés
 
 ## Functors, Monads & syntactic sugar
   - Functors : Wrapper/boite qui peut contenir n'importe quel type, qui masque la complexité et qui permet de `map` d'un type A vers un type B...
@@ -182,12 +203,3 @@ export const Component: FC<ComponentProps> = ({children}) => <div className="Com
 ## external libs
   - no jquery
   - don't use libs imported from jsp
-
-## state management
-
-  - state management tools:
-    * plain React: lift state jusqu'au plus haut composant commun (TODO: faire un dessin)
-    * plain React with Context: même esprit qu'au dessus, permet d'eviter les props drilling. Un peu moins opti que redux sur des states qui changent beaucoup, mais ça fait le taf. Nickel pour partager des constantes ou presque.
-    * Redux: state global, mais bien managé
-    * StateX: states possibles et transformations hardcodés
-  -  garder states minimales: par exemple, au lieu d'avoir un état qui dit si on est LOADING/DISPLAY_PPS/ERROR et un état qui contient les tarifications, il suffit de fetcher les tarifications, et display loading si tarifications est undefined, et error si offre.length===0 par exemple. 1 état au lieu de 2.
