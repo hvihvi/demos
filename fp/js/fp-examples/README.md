@@ -4,7 +4,7 @@ JS contient beaucoup de features, du legacy, d'autres mal foutues, et certaines 
 
 # FP
 
-- trendy dans l'ecosysteme JS
+- trendy dans l'ecosysteme JS, et en particulier React
 - cleaner code, facilite la compréhension, moins de boilerplate, mental model simple
 - un vocabulaire qui fait peur, mais des conceptes simple, pas besoin d'être un autiste (du moins pour la partie qui nous intéresse)
 - y a plus à désapprendre qu'à apprendre
