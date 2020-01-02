@@ -61,6 +61,7 @@ const f = a => b => a + b // FP functions
 
 * avoid `class`, `new`, `this`...
   - https://codesandbox.io/s/react-mutation-antipattern-demo-jv5sw : on perd l'encapsulation d'étât de React
+  - l'écosysteme React fournit quasiment tout ce qu'il faut pour créer des états sans avoir à créer de classes (state/context/redux/...)
   - Est-ce que je peux remplacer par des fonctions? pure? Est-ce que je peux utiliser les outils mis à disposition par React (ex: `<Context>`, hook, redux...)
   - risque d'avoir des modèles mentaux basés sur Java, alors que `this` et l'héritage sont différents (prototypal inheritance) https://blog.isquaredsoftware.com/presentations/2019-05-js-for-java-devs/#/62
   - pas besoin de créer des `ApiClientService` à instancier en lui passant une baseUrl etc, une simple fonction avec un param suffit (ex ici: `fetch`)
@@ -75,7 +76,7 @@ const f = a => b => a + b // FP functions
 
 ## avoid hasty abstractions
 
-  - inversion of control, DRY, separation of concerns, design-patterns... à modérer 🙏 source de code difficile à penser et manipuler ❗️
+  - On a appris pendant des années : inversion of control, DRY, separation of concerns, design-patterns... à modérer 🙏 source de code difficile à penser et manipuler ❗️
   - Exemple DRY hâtif:
     * "hey, si je mutualisais ce truc, ça sera cool, j'aurais plus besoin de me répéter"...
     * le temps passe...
@@ -96,9 +97,9 @@ const f = a => b => a + b // FP functions
   - Exemple d'inversion of control hâtive qui complique la tâche :
 ```js
 // Pattern IoC (render props)
-<ComposantComplexe
+ComposantComplexe = () => <Wrapper
   className={"aze"}
-  renderTrucInterne={ctx => <TropBienJeChoisisMonRendu // mais bon c'est chiant faut lui passer ctx si on veut accéder à l'état interne, inception
+  renderTrucInterne={ctx => <TropBienJeChoisisMonRendu // c'est tordu, faut lui passer ctx si on veut accéder à l'état interne, inception
     ctx={ctx}
     renderAutreTrucInterne={<EtAussiLeRenduDuRendu/>}
   />}
@@ -113,8 +114,11 @@ const ComposantProbablementMoinsComplexe = () =>
   <AutreTrucInterne/>
 </Wrapper>
 ```
-  - separation of concerns: ex: split js/html/css. JSX, css-in-js, ça trigger les anciens, mais ça facilite la vie. Présenté en 2014 par @vjeux (prettier, react native...), en 2019 rewrite de facebook avec ces techno.
+  - separation of concerns: ex: split js/html/css. JSX, css-in-js, ça trigger les anciens, mais ça facilite la vie. Présenté en 2014 par @vjeux (prettier, react native...), en 2019 rewrite de facebook avec ces techno 💅.
 
+  - Dans React contemporain, la mutualisation du code stateful se fait très majoritairement via des custom hooks (anciennement HOC et renderProps), et le code stateless via des fonctions. La réutilisabilité des composants est faite par composition, par exemple en piochant dans des design-systems.
+  Eviter de retomber dans d'anciennes abstractions poussées par d'autres frameworks moins adaptées (html, jsp, gwt...), React est adapté à l'abstraction "Component". (par ex dans les premières itérations du design-system on passait tag+className en props à un <Bouton>, ça contourne l'abstraction)
+  - Il n'y a pas de composant trop petit ✅ par contre ils peuvent être trop gros. Tendance legacy JSP à utiliser le composant comme une page.
 
 ## avoid mutations
 
@@ -183,6 +187,7 @@ export const Component: FC<ComponentProps> = ({children}) => <div className="Com
 
   - state management tools:
     * plain React: lift state jusqu'au plus haut composant commun (TODO: faire un dessin)
+    * plain React with Context: même esprit qu'au dessus, permet d'eviter les props drilling. Un peu moins opti que redux sur des states qui changent beaucoup, mais ça fait le taf. Nickel pour partager des constantes ou presque.
     * Redux: state global, mais bien managé
     * StateX: states possibles et transformations hardcodés
   -  garder states minimales: par exemple, au lieu d'avoir un état qui dit si on est LOADING/DISPLAY_PPS/ERROR et un état qui contient les tarifications, il suffit de fetcher les tarifications, et display loading si tarifications est undefined, et error si offre.length===0 par exemple. 1 état au lieu de 2.
